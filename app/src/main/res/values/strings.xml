@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Bezpieczna Wiadomość</string>
+    <string name="message_content_text">Treść wiadomości</string>
+    <string name="receiver_text">Odbiorca</string>
+</resources>

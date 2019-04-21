@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activity_conversation"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".activity.ConversationActivity">
+
+    <EditText
+        android:id="@+id/conversationA_receiverNo"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:textSize="17sp"
+        android:background="#f2f2f2"
+        android:hint="@string/receiver_text"
+        android:inputType="phone"
+        />
+
+    <Button
+        android:id="@+id/conversationA_contactBtn"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignEnd="@id/conversationA_receiverNo"
+        android:drawableStart="@drawable/ic_person"
+        android:backgroundTint="@color/colorPrimary"
+        android:layout_marginEnd="10dp"
+        />
+
+    <ListView
+        android:id="@+id/conversationA_msgList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/conversationA_sendBtn"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="55dp"
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll"
+        android:dividerHeight="0dp"
+        android:divider="@android:color/transparent"
+        />
+
+    <EditText
+        android:id="@+id/conversationA_msgContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toStartOf="@+id/conversationA_sendBtn"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:hint="@string/message_content_text"
+        />
+
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/conversationA_sendBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/ic_send"
+        android:tint="@android:color/white"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        />
+
+</RelativeLayout>
