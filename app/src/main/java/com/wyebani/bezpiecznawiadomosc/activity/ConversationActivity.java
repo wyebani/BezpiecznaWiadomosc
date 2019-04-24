@@ -133,7 +133,7 @@ public class ConversationActivity extends BaseActivity {
 
                     if( conversation.getReceiver().getPhoneNo().equals(rcvNo) ) {
 
-                        // TODO - szyfrowanie wiadomości
+                        /* TODO - szyfrowanie wiadomości */
                         SmsManager smsManager = SmsManager.getDefault();
                         smsManager.sendTextMessage(rcvNo,
                                 null,

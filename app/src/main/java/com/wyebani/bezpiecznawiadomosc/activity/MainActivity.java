@@ -6,6 +6,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
+import android.support.design.widget.FloatingActionButton;
 import com.wyebani.bezpiecznawiadomosc.R;
 import com.wyebani.bezpiecznawiadomosc.adapter.ConversationAdapter;
 import com.wyebani.bezpiecznawiadomosc.model.Conversation;
@@ -19,7 +20,8 @@ public class MainActivity extends BaseActivity {
     private static final String TAG = ToolSet.getTag(MainActivity.class.toString());
 
     /* View */
-    private RecyclerView        recyclerView;
+    private RecyclerView            recyclerView;
+    private FloatingActionButton    newConversationButton;
 
     /* Adapter */
     private ConversationAdapter adapter;
@@ -38,6 +40,9 @@ public class MainActivity extends BaseActivity {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         recyclerView.setAdapter(adapter);
+
+        newConversationButton = findViewById(R.id.mainA_newConversationButton);
+        newConversationButton.setOnClickListener(v -> newConversation());
     }
 
     private void onItemClick(Conversation conversation) {
@@ -45,5 +50,11 @@ public class MainActivity extends BaseActivity {
         Intent intent = new Intent(MainActivity.this, ConversationActivity.class);
         intent.putExtra("conversation", conversation);
         startActivity(intent);
+    }
+
+    private void newConversation(){
+        Intent intent = new Intent(MainActivity.this, ConversationActivity.class);
+        startActivity(intent);
+        Log.d(TAG, "New conversation created");
     }
 }
