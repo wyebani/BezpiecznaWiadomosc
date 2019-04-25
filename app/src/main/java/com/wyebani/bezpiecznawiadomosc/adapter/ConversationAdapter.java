@@ -3,24 +3,31 @@ package com.wyebani.bezpiecznawiadomosc.adapter;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 import com.wyebani.bezpiecznawiadomosc.R;
 import com.wyebani.bezpiecznawiadomosc.listener.ConversationItemClickListener;
 import com.wyebani.bezpiecznawiadomosc.model.Conversation;
 import com.wyebani.bezpiecznawiadomosc.model.Message;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapter.ViewHolder> {
+public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapter.ViewHolder> implements Filterable {
 
     private List<Conversation>              conversationList;
+    private List<Conversation>              conversationListFull;
     private ConversationItemClickListener   clickListener;
 
     public ConversationAdapter(List<Conversation> conversationList, ConversationItemClickListener clickListener) {
         this.conversationList   = conversationList;
+        conversationListFull = new ArrayList<>(conversationList);
         this.clickListener = clickListener;
     }
 
@@ -97,4 +104,44 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
             });
         }
     }
+    @Override
+    public Filter getFilter(){
+        return contactFilter;
+    }
+
+    private Filter contactFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<Conversation> filteredList = new ArrayList<>();
+
+            if (constraint == null || constraint.length() == 0) {
+                filteredList.addAll(conversationListFull);
+            } else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+
+                for (Conversation conversation : conversationListFull) {
+                    if (conversation.getReceiver().getPhoneNo().contains(filterPattern)) {
+                        Log.d("receiverdata", conversation.getReceiver().getPhoneNo());
+                        filteredList.add(conversation);
+                    }
+                   /* if (conversation.getReceiver().getName().toLowerCase().contains(filterPattern)) {
+                        Log.i("receiverdata",conversation.getReceiver().getName());
+                        filteredList.add(conversation);
+                        //TODO (Paweł) ^działa  tylko dla numeru
+                    }*/
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filteredList;
+
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            conversationList.clear();
+            conversationList.addAll((List) results.values);
+            notifyDataSetChanged();
+        }
+    };
 }
