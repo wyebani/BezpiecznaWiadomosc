@@ -3,4 +3,5 @@
     <string name="message_content_text">Treść wiadomości</string>
     <string name="receiver_text">Odbiorca</string>
     <string name="szukaj">Szukaj...</string>
+    <string name="key_exchange_text">Wymiana kluczy</string>
 </resources>

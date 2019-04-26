@@ -132,7 +132,6 @@ public class ConversationActivity extends BaseActivity {
                     }/* conversation != null */
 
                     if( conversation.getReceiver().getPhoneNo().equals(rcvNo) ) {
-
                         /* TODO - szyfrowanie wiadomości */
                         SmsManager smsManager = SmsManager.getDefault();
                         smsManager.sendTextMessage(rcvNo,
@@ -159,6 +158,7 @@ public class ConversationActivity extends BaseActivity {
                         conversation.addMessage(message);
                         conversation.save();
                         updateMessageListView();
+                        msgContentTxt.getText().clear();
                     }
 
                 } else {
@@ -194,6 +194,7 @@ public class ConversationActivity extends BaseActivity {
 
     private void updateMessageListView() {
         Log.d(TAG, "updateMessageListView()");
+        conversation.refreshMessages();
         MessageAdapter adapter
                 = new MessageAdapter(conversation, ConversationActivity.this);
         msgListView.setAdapter(adapter);

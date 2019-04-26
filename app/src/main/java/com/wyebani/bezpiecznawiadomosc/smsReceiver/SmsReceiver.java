@@ -49,8 +49,6 @@ public class SmsReceiver extends BroadcastReceiver {
                         Log.d(TAG, "Message: " + msg);
 
                         Message message;
-
-
                         Conversation conversation = Conversation.findByPhoneNo(phoneNo);
 
                         if( conversation == null ) {

@@ -38,7 +38,7 @@ public class Conversation extends SugarRecord<Conversation> implements Serializa
     }
 
     public List<Message> getMessages() {
-        if(  messages == null ) {
+        if( messages == null ) {
             messages = Message.find(Message.class, "receiver = ?", String.valueOf(receiver.getId()));
         }
         return messages;
@@ -57,6 +57,10 @@ public class Conversation extends SugarRecord<Conversation> implements Serializa
         for( Message message : messageList ) {
             message.save();
         }
+    }
+
+    public void refreshMessages() {
+        messages = Message.find(Message.class, "receiver = ?", String.valueOf(receiver.getId()));
     }
 
     public Message getLastMessage() {

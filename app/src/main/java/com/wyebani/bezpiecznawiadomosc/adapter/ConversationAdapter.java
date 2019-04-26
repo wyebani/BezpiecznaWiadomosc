@@ -14,6 +14,7 @@ import com.wyebani.bezpiecznawiadomosc.R;
 import com.wyebani.bezpiecznawiadomosc.listener.ConversationItemClickListener;
 import com.wyebani.bezpiecznawiadomosc.model.Conversation;
 import com.wyebani.bezpiecznawiadomosc.model.Message;
+import com.wyebani.bezpiecznawiadomosc.tools.ToolSet;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,7 +28,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
 
     public ConversationAdapter(List<Conversation> conversationList, ConversationItemClickListener clickListener) {
         this.conversationList   = conversationList;
-        conversationListFull = new ArrayList<>(conversationList);
+        this.conversationListFull = new ArrayList<>(conversationList);
         this.clickListener = clickListener;
     }
 
@@ -121,14 +122,13 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
 
                 for (Conversation conversation : conversationListFull) {
                     if (conversation.getReceiver().getPhoneNo().contains(filterPattern)) {
-                        Log.d("receiverdata", conversation.getReceiver().getPhoneNo());
                         filteredList.add(conversation);
                     }
-                   /* if (conversation.getReceiver().getName().toLowerCase().contains(filterPattern)) {
-                        Log.i("receiverdata",conversation.getReceiver().getName());
-                        filteredList.add(conversation);
-                        //TODO (Paweł) ^działa  tylko dla numeru
-                    }*/
+                    if (conversation.getReceiver().getName() != null) {
+                        if( conversation.getReceiver().getName().toLowerCase().contains(filterPattern) ) {
+                            filteredList.add(conversation);
+                        }
+                    }
                 }
             }
             FilterResults results = new FilterResults();

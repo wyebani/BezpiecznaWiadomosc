@@ -21,11 +21,11 @@ public class SelectContactActivity extends BaseActivity {
     private ContactAdapter adapter;
 
     // TODO(Paweł) - po wysłaniu wiadomosci - wyczyscic
-    // TODO dorobić odswiezanie aktualnych konwersacji
-    // TODO problem z wyswietlaniem wiadomosci od odbiorcy
-    // google.com -> how to filter RecyclerView
-    // Dodać przycisk (lupę) na górnym pasku i pole do wpisania
-    // Przykład: https://www.youtube.com/watch?v=sJ-Z9G0SDhc
+    //    // TODO dorobić odswiezanie aktualnych konwersacji
+    //    // TODO problem z wyswietlaniem wiadomosci od odbiorcy
+    //    // google.com -> how to filter RecyclerView
+    //    // Dodać przycisk (lupę) na górnym pasku i pole do wpisania
+    //    // Przykład: https://www.youtube.com/watch?v=sJ-Z9G0SDhc
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
