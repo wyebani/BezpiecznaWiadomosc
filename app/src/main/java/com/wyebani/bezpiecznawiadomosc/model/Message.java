@@ -22,6 +22,6 @@ public class Message extends SugarRecord<Message> implements Serializable {
     private Boolean     isEncrypted;
     private Date        date;
     @Nullable
-    private AesKey      aesKey;
+    private DHKeys DHKeys;
 
 }

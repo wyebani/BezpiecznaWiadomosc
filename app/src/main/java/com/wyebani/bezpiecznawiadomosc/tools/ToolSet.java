@@ -1,5 +1,12 @@
 package com.wyebani.bezpiecznawiadomosc.tools;
 
+import android.util.Base64;
+
+import com.wyebani.bezpiecznawiadomosc.activity.BaseActivity;
+import com.wyebani.bezpiecznawiadomosc.model.Conversation;
+import com.wyebani.bezpiecznawiadomosc.model.Receiver;
+
+import java.util.ArrayList;
 import java.util.Map;
 
 public class ToolSet {
@@ -63,5 +70,71 @@ public class ToolSet {
             }
         }
         return null;
+    }
+
+    /**
+     * Change hex value into String
+     * @param hex - byte array
+     * @return String with hex value
+     */
+    public static String hexToString(byte[] hex) {
+        return Base64.encodeToString(hex, Base64.DEFAULT);
+    }
+
+    /**
+     * Change String value into byte array
+     * @param hex - String with hex value
+     * @return byte array
+     */
+    public static byte[] stringToHex(String hex) {
+        return Base64.decode(hex, Base64.DEFAULT);
+    }
+
+    /**
+     * Check if conversation exists in DB:
+     *       if yes => return
+     *       if no  => create new Conversation object
+     * @param phoneNo - receiver phone number
+     * @return Conversation object
+     */
+    public static Conversation getConversationByPhoneNo(String phoneNo) {
+        Conversation conversation = null;
+        conversation = Conversation.findByPhoneNo(phoneNo);
+
+        if( conversation == null ) {
+            Receiver receiver = null;
+            if ( BaseActivity.sContactMap.containsValue(ToolSet.getStandardPhoneNo(phoneNo)) ) {
+                receiver = new Receiver(
+                        ToolSet.getNameByPhoneNo(BaseActivity.sContactMap, phoneNo),
+                        phoneNo,
+                        null
+                );
+            } else {
+                receiver = new Receiver(
+                        null,
+                        phoneNo,
+                        null
+                );
+            }
+            receiver.save();
+            conversation = new Conversation(receiver, new ArrayList<>());
+        }
+
+        return conversation;
+    }
+
+    /**
+     * Returns binary data from string
+     * @param str - in string
+     * @param numberOfCharactersWanted - number of wanted characters
+     * @return string with binary data
+     */
+    public static String getBinary(String str, int numberOfCharactersWanted) {
+        StringBuilder result = new StringBuilder();
+        byte[] byt = str.getBytes();
+        for (int i = 0; i < numberOfCharactersWanted; i++) {
+            result.append(String.format("%8s", Integer.toBinaryString(byt[i])).replace(' ', '0')).append(' ');
+        }
+        return result.toString();
     }
 }

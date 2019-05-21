@@ -11,7 +11,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.wyebani.bezpiecznawiadomosc.R;
-import com.wyebani.bezpiecznawiadomosc.model.AesKey;
+import com.wyebani.bezpiecznawiadomosc.model.DHKeys;
 import com.wyebani.bezpiecznawiadomosc.model.Conversation;
 import com.wyebani.bezpiecznawiadomosc.model.Message;
 import com.wyebani.bezpiecznawiadomosc.model.Receiver;
@@ -32,7 +32,7 @@ public class LoadActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_load);
 
-        //dropDb();
+        dropDb();
         initApp();
 
     }
@@ -95,7 +95,7 @@ public class LoadActivity extends BaseActivity {
 
     private void dropDb() {
         Log.d(TAG, "Cleaning database...");
-        AesKey.deleteAll(AesKey.class);
+        DHKeys.deleteAll(DHKeys.class);
         Conversation.deleteAll(Conversation.class);
         Message.deleteAll(Message.class);
         Receiver.deleteAll(Receiver.class);

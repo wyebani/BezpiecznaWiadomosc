@@ -12,13 +12,11 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor @AllArgsConstructor @Data @EqualsAndHashCode(callSuper=false)
-public class AesKey extends SugarRecord<AesKey> implements Serializable {
+public class DHKeys extends SugarRecord<DHKeys> implements Serializable {
 
     @NonNull
     private String      receiverPhoneNo;
-    @NonNull
-    private Byte[]      receiverKey;
-    @NonNull
-    private Byte[]      senderKey;
+    private String      receiverPublicKey;
+    private String      senderPrivateKey;
 
 }

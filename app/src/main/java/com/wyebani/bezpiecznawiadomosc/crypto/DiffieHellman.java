@@ -1,9 +1,12 @@
 package com.wyebani.bezpiecznawiadomosc.crypto;
 
+
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.wyebani.bezpiecznawiadomosc.tools.ToolSet;
 
+import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -14,47 +17,17 @@ import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-
-import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
-import javax.crypto.spec.SecretKeySpec;
 
-public class Crypto {
+public class DiffieHellman {
 
-    private final static String TAG = ToolSet.getTag(Crypto.class.toString());
-
-    public static byte[] encryptMessage(final byte[] message, byte[] secretKey) {
-        Log.d(TAG, "Encrypting message");
-        try {
-            final SecretKeySpec keySpec = new SecretKeySpec(secretKey, "AES");
-            final Cipher cipher  = Cipher.getInstance("AES/ECB/PKCS5Padding");
-
-            cipher.init(Cipher.ENCRYPT_MODE, keySpec);
-            return cipher.doFinal(message);
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
-        return null;
-    }
-
-    public static byte[] decryptMessage(byte[] message, byte[] secretKey) {
-        Log.d(TAG, "Decrypting message");
-        try {
-            final SecretKeySpec keySpec = new SecretKeySpec(secretKey, "AES");
-            final Cipher cipher  = Cipher.getInstance("AES/ECB/PKCS5Padding");
-
-            cipher.init(Cipher.DECRYPT_MODE, keySpec);
-            return cipher.doFinal(message);
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
-        return null;
-    }
+    private final static String TAG = ToolSet.getTag(DiffieHellman.class.toString());
+    private final static String ALGORITHM = "DH";
 
     public static KeyPair generateKeys() {
-        Log.d(TAG, "Generating keys");
+        Log.d(TAG, "Generating key pair");
         try {
-            final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("DH");
+            final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
             keyPairGenerator.initialize(1024);
             return keyPairGenerator.generateKeyPair();
         } catch (Exception e) {
@@ -63,31 +36,31 @@ public class Crypto {
         return null;
     }
 
-    public static byte[] generateCommonSecretKey(byte[] myPrivateKey, byte[] receivedPublicKey) {
+    public static String generateCommonSecretKey(String myPrivateKey, String receivedPublicKey) {
         Log.d(TAG, "Generate receiver private key");
         try {
-            KeyFactory keyFactory = KeyFactory.getInstance("DH");
-            EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(myPrivateKey);
+            KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
+            EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(ToolSet.stringToHex(myPrivateKey));
             PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
 
             PublicKey receiverPublicKey = restorePublicKeyFrom(receivedPublicKey);
 
-            final KeyAgreement keyAgreement = KeyAgreement.getInstance("DH");
+            final KeyAgreement keyAgreement = KeyAgreement.getInstance(ALGORITHM);
             keyAgreement.init(privateKey);
             keyAgreement.doPhase(receiverPublicKey, true);
 
-            return shortenSecretKey(keyAgreement.generateSecret());
+            return ToolSet.hexToString(shortenSecretKey(keyAgreement.generateSecret()));
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
         return null;
     }
 
-    private static PublicKey restorePublicKeyFrom(byte[] receiverKey) {
+    private static PublicKey restorePublicKeyFrom(String receiverKey) {
         Log.d(TAG, "Restore public key from message");
         try {
-            KeyFactory keyFactory = KeyFactory.getInstance("DH");
-            EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(receiverKey);
+            KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
+            EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(ToolSet.stringToHex(receiverKey));
             return keyFactory.generatePublic(publicKeySpec);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             Log.e(TAG, e.getMessage());

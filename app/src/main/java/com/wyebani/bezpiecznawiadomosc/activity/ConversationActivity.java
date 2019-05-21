@@ -5,14 +5,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.SearchView;
 import android.telephony.SmsManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -22,12 +28,17 @@ import android.widget.Toast;
 import com.github.clans.fab.FloatingActionButton;
 import com.wyebani.bezpiecznawiadomosc.R;
 import com.wyebani.bezpiecznawiadomosc.adapter.MessageAdapter;
+import com.wyebani.bezpiecznawiadomosc.crypto.DiffieHellman;
 import com.wyebani.bezpiecznawiadomosc.model.Conversation;
+import com.wyebani.bezpiecznawiadomosc.model.DHKeys;
 import com.wyebani.bezpiecznawiadomosc.model.Message;
 import com.wyebani.bezpiecznawiadomosc.model.Receiver;
+import com.wyebani.bezpiecznawiadomosc.sms.SmsBase;
+import com.wyebani.bezpiecznawiadomosc.sms.smsSender.SmsSender;
 import com.wyebani.bezpiecznawiadomosc.tools.PermTools;
 import com.wyebani.bezpiecznawiadomosc.tools.ToolSet;
 
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -107,44 +118,12 @@ public class ConversationActivity extends BaseActivity {
                     rcvNo = ToolSet.getStandardPhoneNo(rcvNo);
 
                     if( conversation == null ) {
-                        conversation = Conversation.findByPhoneNo(rcvNo);
+                        conversation = ToolSet.getConversationByPhoneNo(rcvNo);
                     }
-
-                    Receiver receiver = null;
-                    if( conversation == null ) {
-                        if ( sContactMap.containsValue(ToolSet.getStandardPhoneNo(rcvNo)) ) {
-                            receiver = new Receiver(
-                                    ToolSet.getNameByPhoneNo(BaseActivity.sContactMap, rcvNo),
-                                    rcvNo,
-                                    null /* TODO */
-                            );
-                        } else {
-                            receiver = new Receiver(
-                                    null,
-                                    rcvNo,
-                                    null /* TODO */
-                            );
-                        }
-                        receiver.save();
-                        conversation = new Conversation(receiver, new ArrayList<>());
-                    } else {
-                        receiver = conversation.getReceiver();
-                    }/* conversation != null */
+                    Receiver receiver = conversation.getReceiver();
 
                     if( conversation.getReceiver().getPhoneNo().equals(rcvNo) ) {
                         /* TODO - szyfrowanie wiadomości */
-                        SmsManager smsManager = SmsManager.getDefault();
-                        smsManager.sendTextMessage(rcvNo,
-                                null,
-                                msg,
-                                null,
-                                null
-                        );
-
-                        Log.d(TAG, "Message sent");
-                        Log.d(TAG, "Receiver: " + rcvNo);
-                        Log.d(TAG, "Message: " + msg);
-
                         Message message = new Message(
                                 receiver,
                                 msg,
@@ -155,6 +134,7 @@ public class ConversationActivity extends BaseActivity {
                                 null      /* TODO */
                         );
 
+                        SmsSender.sendSms(receiver, msg);
                         conversation.addMessage(message);
                         conversation.save();
                         updateMessageListView();
@@ -209,6 +189,56 @@ public class ConversationActivity extends BaseActivity {
             }
         };
         registerReceiver(receiver, new IntentFilter("sms.received"));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_key_exchange, menu);
+
+        MenuItem keyExchangeButton = menu.findItem(R.id.action_keyExchange);
+        keyExchangeButton.setOnMenuItemClickListener( (MenuItem item) -> {
+            if( !receiverNoTxt.getText().toString().isEmpty() ) {
+
+                String phoneNo = receiverNoTxt.getText()
+                        .toString()
+                        .replaceAll(".*\\(|\\).*", "");
+                phoneNo = ToolSet.getStandardPhoneNo(phoneNo);
+                conversation = ToolSet.getConversationByPhoneNo(phoneNo);
+                
+                if( conversation != null ) {
+                    KeyPair keyPair = DiffieHellman.generateKeys();
+                    String myPrivateKey = ToolSet.hexToString(keyPair.getPrivate().getEncoded());
+                    String myPublicKey = ToolSet.hexToString(keyPair.getPublic().getEncoded());
+                    if( conversation.getReceiver().getDHKeys() == null ) {
+                        DHKeys dhk = new DHKeys();
+                        dhk.setReceiverPhoneNo(phoneNo);
+                        conversation.getReceiver().setDHKeys(dhk);
+                    }
+                    conversation.getReceiver().getDHKeys().setSenderPrivateKey(myPrivateKey);
+                    String msg = SmsBase.createKeyExchangeRequest(myPublicKey);
+                    SmsSender.sendSms(conversation.getReceiver(), msg);
+                    Message message = new Message(conversation.getReceiver(),
+                                                  msg,
+                                                  true,
+                                                  false,
+                                                  false,
+                                                  new Date(),
+                                                  null);
+                    conversation.addMessage(message);
+                    conversation.save();
+                    updateMessageListView();
+                }
+            } else {
+                Toast.makeText(ConversationActivity.this,
+                        "Wpisz numer telefonu odbiorcy!",
+                        Toast.LENGTH_SHORT
+                ).show();
+                Log.d(TAG, "Receiver phone number is empty!");
+            }
+            return true;
+        });
+        return true;
     }
 
     @Override

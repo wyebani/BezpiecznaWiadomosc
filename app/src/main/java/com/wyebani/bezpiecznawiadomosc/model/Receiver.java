@@ -20,7 +20,7 @@ public class Receiver extends SugarRecord<Receiver> implements Serializable {
     @NonNull
     private String      phoneNo;
     @Nullable
-    private AesKey      aesKey;
+    private DHKeys      DHKeys;
 
     public static Receiver findByPhoneNo(String phoneNo) {
         List<Receiver> receiverList
