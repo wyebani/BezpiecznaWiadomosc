@@ -8,12 +8,16 @@ import android.telephony.SmsMessage;
 import android.util.Log;
 
 import com.wyebani.bezpiecznawiadomosc.activity.BaseActivity;
+import com.wyebani.bezpiecznawiadomosc.crypto.DiffieHellman;
 import com.wyebani.bezpiecznawiadomosc.model.Conversation;
+import com.wyebani.bezpiecznawiadomosc.model.DHKeys;
 import com.wyebani.bezpiecznawiadomosc.model.Message;
 import com.wyebani.bezpiecznawiadomosc.model.Receiver;
 import com.wyebani.bezpiecznawiadomosc.sms.SmsBase;
+import com.wyebani.bezpiecznawiadomosc.sms.smsSender.SmsSender;
 import com.wyebani.bezpiecznawiadomosc.tools.ToolSet;
 
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
@@ -81,7 +85,57 @@ public class SmsReceiver extends BroadcastReceiver {
     }
 
     private void processKeyExchangeRequest(String msg, String phoneNo, Context context) {
-        // TODO - zapisać do bazy danych klucz, wygenerować swój i wysłać
+        KeyPair keyPair = DiffieHellman.generateKeys();
+
+        String receiverPubKey = msg.substring(1);
+        String myPrivateKey = ToolSet.hexToString(keyPair.getPrivate().getEncoded());
+        String myPublicKey = ToolSet.hexToString(keyPair.getPublic().getEncoded());
+
+        String secretKey = DiffieHellman.generateCommonSecretKey(
+                myPrivateKey,
+                receiverPubKey
+        );
+        DHKeys dhKeys = new DHKeys(phoneNo, receiverPubKey, myPrivateKey);
+        Conversation conversation = Conversation.findByPhoneNo(phoneNo);
+
+        if( conversation == null ) {
+            Receiver receiver = Receiver.findByPhoneNo(phoneNo);
+            if( receiver == null ) {
+                if( BaseActivity
+                        .sContactMap
+                        .containsValue(ToolSet.getStandardPhoneNo(phoneNo)) ) {
+                    receiver = new Receiver(
+                            ToolSet.getNameByPhoneNo(BaseActivity.sContactMap, phoneNo),
+                            phoneNo,
+                            null
+                    );
+                } else {
+                    receiver = new Receiver(
+                            null,
+                            phoneNo,
+                            null
+                    );
+                }
+            }
+            conversation = new Conversation(receiver, new ArrayList<>());
+        } /* conversation == null */
+
+        Message message = new Message(
+                conversation.getReceiver(),
+                msg,
+                false,
+                true,
+                true,
+                new Date(),
+                dhKeys
+        );
+        conversation.addMessage(message);
+        conversation.getReceiver().setDHKeys(dhKeys);
+        conversation.save();
+        updateView(context);
+
+        String response = SmsSender.createKeyExchangeResponse(myPublicKey);
+        SmsSender.sendSms(conversation.getReceiver(), response);
     }
 
     private void processMessage(String msg, String phoneNo, Context context) {
@@ -129,7 +183,7 @@ public class SmsReceiver extends BroadcastReceiver {
         int msgType = SmsBase.MSG_TYPE_OTHER;
         boolean isDigit = Character.isDigit(msg.charAt(0));
         if( isDigit ) {
-            msgType = msg.charAt(0);
+            msgType = (int) msg.charAt(0) - 48;
         }
         return msgType;
     }

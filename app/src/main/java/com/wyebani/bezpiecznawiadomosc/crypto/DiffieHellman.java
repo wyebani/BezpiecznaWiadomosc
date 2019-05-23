@@ -28,7 +28,7 @@ public class DiffieHellman {
         Log.d(TAG, "Generating key pair");
         try {
             final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
-            keyPairGenerator.initialize(1024);
+            keyPairGenerator.initialize(200);
             return keyPairGenerator.generateKeyPair();
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
