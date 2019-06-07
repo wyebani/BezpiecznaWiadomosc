@@ -17,7 +17,7 @@ public class AES {
     private final byte[] keyValue;
 
     public AES(String key) {
-        keyValue = key.getBytes();
+        keyValue = ToolSet.stringToHex(key);
     }
 
     public String encrypt(String message) {

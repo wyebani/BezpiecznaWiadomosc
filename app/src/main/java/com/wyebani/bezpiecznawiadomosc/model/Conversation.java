@@ -22,6 +22,8 @@ public class Conversation extends SugarRecord<Conversation> implements Serializa
     private List<Message>       messages;
 
     public static Conversation findByPhoneNo(String phoneNo) {
+        Conversation conversation = null;
+
         Receiver receiver = Receiver.findByPhoneNo(phoneNo);
         if( receiver != null ) {
             List<Conversation> conversationList
@@ -30,11 +32,22 @@ public class Conversation extends SugarRecord<Conversation> implements Serializa
                     String.valueOf(receiver.getId()));
 
             if( conversationList.size() == 1 ) {
-                return conversationList.get(0);
+                conversation = conversationList.get(0);
+                conversation.setReceiver(receiver);
             }
         } /* receiver != null */
 
-        return null;
+        return conversation;
+    }
+
+    public DHKeys getDhKeys() {
+        DHKeys dhKeys;
+        if( receiver.getDhKeys() == null ) {
+            dhKeys = DHKeys.find(DHKeys.class, "receiverPhoneNo = ?", receiver.getPhoneNo()).get(0);
+        } else {
+            dhKeys = receiver.getDhKeys();
+        }
+        return dhKeys;
     }
 
     public List<Message> getMessages() {

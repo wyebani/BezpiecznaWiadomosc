@@ -6,7 +6,17 @@
         android:id="@+id/action_keyExchange"
         android:icon="@drawable/ic_key"
         android:title="@string/key_exchange_text"
-        app:showAsAction="always"
+        app:showAsAction="never"
         />
+
+    <group android:checkableBehavior="all">
+        <item
+            android:id="@+id/encryptingEnable"
+            android:titleCondensed="Szyfrowanie"
+            android:title="@string/encrypting_enable"
+            />
+    </group>
+
+
 
 </menu>

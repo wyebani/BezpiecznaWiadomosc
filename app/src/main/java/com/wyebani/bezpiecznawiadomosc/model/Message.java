@@ -1,6 +1,5 @@
 package com.wyebani.bezpiecznawiadomosc.model;
 
-import android.support.annotation.Nullable;
 
 import com.orm.SugarRecord;
 
@@ -18,10 +17,7 @@ public class Message extends SugarRecord<Message> implements Serializable {
     private Receiver    receiver;
     private String      msgContent;
     private Boolean     sendByUser;
-    private Boolean     isRead;
     private Boolean     isEncrypted;
     private Date        date;
-    @Nullable
-    private DHKeys DHKeys;
 
 }

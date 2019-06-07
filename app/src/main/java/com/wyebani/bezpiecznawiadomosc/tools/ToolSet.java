@@ -118,6 +118,7 @@ public class ToolSet {
             }
             receiver.save();
             conversation = new Conversation(receiver, new ArrayList<>());
+            conversation.save();
         }
 
         return conversation;

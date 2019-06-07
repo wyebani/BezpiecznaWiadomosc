@@ -14,9 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor @AllArgsConstructor @Data @EqualsAndHashCode(callSuper=false)
 public class DHKeys extends SugarRecord<DHKeys> implements Serializable {
 
-    @NonNull
     private String      receiverPhoneNo;
-    private String      receiverPublicKey;
-    private String      senderPrivateKey;
-
+    private String      myPrivateKey;
+    private String      receiverPubKey;
 }

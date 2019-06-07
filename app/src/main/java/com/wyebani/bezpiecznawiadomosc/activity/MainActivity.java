@@ -48,6 +48,7 @@ public class MainActivity extends BaseActivity {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         recyclerView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
 
         newConversationButton = findViewById(R.id.mainA_newConversationButton);
         newConversationButton.setOnClickListener(v -> newConversation());
@@ -89,5 +90,13 @@ public class MainActivity extends BaseActivity {
             }
         });
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        List<Conversation> conversationList = Conversation.listAll(Conversation.class);
+        adapter = new ConversationAdapter(conversationList, this::onItemClick);
+        recyclerView.setAdapter(adapter);
     }
 }

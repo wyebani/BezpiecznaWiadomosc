@@ -5,29 +5,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.SearchView;
-import android.telephony.SmsManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
 import com.wyebani.bezpiecznawiadomosc.R;
 import com.wyebani.bezpiecznawiadomosc.adapter.MessageAdapter;
+import com.wyebani.bezpiecznawiadomosc.crypto.AES;
 import com.wyebani.bezpiecznawiadomosc.crypto.DiffieHellman;
 import com.wyebani.bezpiecznawiadomosc.model.Conversation;
 import com.wyebani.bezpiecznawiadomosc.model.DHKeys;
@@ -39,9 +34,7 @@ import com.wyebani.bezpiecznawiadomosc.tools.PermTools;
 import com.wyebani.bezpiecznawiadomosc.tools.ToolSet;
 
 import java.security.KeyPair;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 public class ConversationActivity extends BaseActivity {
 
@@ -57,6 +50,7 @@ public class ConversationActivity extends BaseActivity {
     /* Fields */
     private Conversation              conversation;
     private Boolean                   isContact;
+    private Boolean                   encryptingEnable;
 
     /* Broadcast Receiver */
     private BroadcastReceiver         receiver;
@@ -82,10 +76,13 @@ public class ConversationActivity extends BaseActivity {
         receiverNoTxt.addTextChangedListener(new MyTextWatcher());
 
         registerReceiver();
-
+        encryptingEnable = false;
         if( getIntent().hasExtra("conversation") ) {
             conversation =
                     (Conversation) getIntent().getSerializableExtra("conversation");
+            // This is need because of field id which is not serializable by SugarORM
+            Receiver receiver = Receiver.findByPhoneNo(conversation.getReceiver().getPhoneNo());
+            conversation.setReceiver(receiver);
 
             if( conversation.getReceiver().getName() != null ) {
                 isContact = true;
@@ -117,21 +114,35 @@ public class ConversationActivity extends BaseActivity {
                             .replaceAll(".*\\(|\\).*", "");
                     rcvNo = ToolSet.getStandardPhoneNo(rcvNo);
 
-                    if( conversation == null ) {
-                        conversation = ToolSet.getConversationByPhoneNo(rcvNo);
-                    }
+                    conversation = ToolSet.getConversationByPhoneNo(rcvNo);
                     Receiver receiver = conversation.getReceiver();
 
                     if( conversation.getReceiver().getPhoneNo().equals(rcvNo) ) {
-                        /* TODO - szyfrowanie wiadomości */
+                        String showMsg = msg;
+                        if( encryptingEnable ) {
+                            if( conversation.getReceiver().getDhKeys() != null ) {
+                                String myPrivKey = conversation.getReceiver().getDhKeys().getMyPrivateKey();
+                                String rcvPubKey = conversation.getReceiver().getDhKeys().getReceiverPubKey();
+                                String secretKey = DiffieHellman.generateCommonSecretKey(myPrivKey, rcvPubKey);
+                                AES aesKey = new AES(secretKey);
+
+                                String encryptedMsg = aesKey.encrypt(msg);
+                                msg = SmsBase.createEncryptedMessage(encryptedMsg);
+                            } else {
+                                Log.d(TAG, "Cannot encrypt message! Key exchange needed");
+                                Toast.makeText(ConversationActivity.this,
+                                        "Konieczna wymiana kluczy",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            }
+
+                        }
                         Message message = new Message(
                                 receiver,
-                                msg,
+                                showMsg,
                                 true,
                                 false,
-                                false, /* TODO */
-                                new Date(),
-                                null      /* TODO */
+                                new Date()
                         );
 
                         SmsSender.sendSms(receiver, msg);
@@ -210,21 +221,20 @@ public class ConversationActivity extends BaseActivity {
                     KeyPair keyPair = DiffieHellman.generateKeys();
                     String myPrivateKey = ToolSet.hexToString(keyPair.getPrivate().getEncoded());
                     String myPublicKey = ToolSet.hexToString(keyPair.getPublic().getEncoded());
-                    if( conversation.getReceiver().getDHKeys() == null ) {
+                    if( conversation.getReceiver().getDhKeys() == null ) {
                         DHKeys dhk = new DHKeys();
                         dhk.setReceiverPhoneNo(phoneNo);
-                        conversation.getReceiver().setDHKeys(dhk);
+                        conversation.getReceiver().setDhKeys(dhk);
                     }
-                    conversation.getReceiver().getDHKeys().setSenderPrivateKey(myPrivateKey);
+                    conversation.getReceiver().getDhKeys().setMyPrivateKey(myPrivateKey);
                     String msg = SmsBase.createKeyExchangeRequest(myPublicKey);
                     SmsSender.sendSms(conversation.getReceiver(), msg);
                     Message message = new Message(conversation.getReceiver(),
                                                   msg,
                                                   true,
                                                   false,
-                                                  false,
-                                                  new Date(),
-                                                  null);
+                                                  new Date()
+                    );
                     conversation.addMessage(message);
                     conversation.save();
                     updateMessageListView();
@@ -236,6 +246,22 @@ public class ConversationActivity extends BaseActivity {
                 ).show();
                 Log.d(TAG, "Receiver phone number is empty!");
             }
+            return true;
+        });
+
+        MenuItem encryptingEnableCheckBox = menu.findItem(R.id.encryptingEnable);
+        //encryptingEnableCheckBox.setCheckable(true);
+        encryptingEnableCheckBox.setOnMenuItemClickListener((MenuItem menuItem) -> {
+            if(!encryptingEnableCheckBox.isChecked()) {
+                Log.d(TAG, "Encrypting enabled");
+                encryptingEnableCheckBox.setChecked(true);
+                encryptingEnable = true;
+            } else {
+                Log.d(TAG, "Encrypting disabled");
+                encryptingEnableCheckBox.setChecked(false);
+                encryptingEnable = false;
+            }
+
             return true;
         });
         return true;
@@ -300,5 +326,10 @@ public class ConversationActivity extends BaseActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
+    }
 }
 

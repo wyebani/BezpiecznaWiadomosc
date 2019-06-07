@@ -15,4 +15,8 @@ public abstract class SmsBase {
         return MSG_TYPE_KEY_EXCHANGE_RESPONSE + key;
     }
 
+    public static String createEncryptedMessage(String msg) {
+        return MSG_TYPE_ENCRYPTED + msg;
+    }
+
 }

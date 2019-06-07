@@ -6,8 +6,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.wyebani.bezpiecznawiadomosc.activity.BaseActivity;
+import com.wyebani.bezpiecznawiadomosc.crypto.AES;
 import com.wyebani.bezpiecznawiadomosc.crypto.DiffieHellman;
 import com.wyebani.bezpiecznawiadomosc.model.Conversation;
 import com.wyebani.bezpiecznawiadomosc.model.DHKeys;
@@ -78,10 +80,41 @@ public class SmsReceiver extends BroadcastReceiver {
     }
 
     private void processEncryptedMessage(String msg, String phoneNo, Context context) {
-        // TODO - sprawdzić czy są klucze i czy udało się odszyfrować
-        // jeżeli tak to ok
-        // jeżeli nie ma, to wygenerować klucz i wysłać
-        // jeżeli się nie udało odszyfrować, to wygenerować klucz i wysłać
+        Conversation conversation = Conversation.findByPhoneNo(phoneNo);
+        if( conversation == null ) {
+            Receiver receiver = Receiver.findByPhoneNo(phoneNo);
+            if( receiver == null ) {
+                Toast.makeText(context,
+                        "Rozpocznij procedurę wymiany kluczy!",
+                        Toast.LENGTH_SHORT
+                ).show();
+            } else {
+                conversation = new Conversation(receiver, new ArrayList<>());
+            }
+        }
+
+        if( conversation != null
+            && conversation.getReceiver().getDhKeys().getReceiverPubKey() != null) {
+            String myPrivKey = conversation.getReceiver().getDhKeys().getMyPrivateKey();
+            String receiverPubKey = conversation.getReceiver().getDhKeys().getReceiverPubKey();
+            String secret = DiffieHellman.generateCommonSecretKey(myPrivKey, receiverPubKey);
+            AES aesCrypto = new AES(secret);
+            String encrypted = msg.substring(1);
+            String decrypted = aesCrypto.decrypt(encrypted);
+            Message message = new Message(conversation.getReceiver(),
+                    decrypted,
+                    false,
+                    true,
+                    new Date());
+            conversation.addMessage(message);
+            conversation.save();
+            updateView(context);
+        } else {
+            Toast.makeText(context,
+                    "Rozpocznij procedurę wymiany kluczy!",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
     }
 
     private void processKeyExchangeRequest(String msg, String phoneNo, Context context) {
@@ -95,7 +128,7 @@ public class SmsReceiver extends BroadcastReceiver {
                 myPrivateKey,
                 receiverPubKey
         );
-        DHKeys dhKeys = new DHKeys(phoneNo, receiverPubKey, myPrivateKey);
+        DHKeys dhKeys = new DHKeys(phoneNo, myPrivateKey, receiverPubKey);
         Conversation conversation = Conversation.findByPhoneNo(phoneNo);
 
         if( conversation == null ) {
@@ -122,20 +155,30 @@ public class SmsReceiver extends BroadcastReceiver {
 
         Message message = new Message(
                 conversation.getReceiver(),
-                msg,
+                msg.substring(1),
                 false,
                 true,
-                true,
-                new Date(),
-                dhKeys
+                new Date()
         );
         conversation.addMessage(message);
-        conversation.getReceiver().setDHKeys(dhKeys);
+        conversation.getReceiver().setDhKeys(dhKeys);
+        dhKeys.save();
         conversation.save();
         updateView(context);
 
         String response = SmsSender.createKeyExchangeResponse(myPublicKey);
         SmsSender.sendSms(conversation.getReceiver(), response);
+
+        Message message2 = new Message(
+                conversation.getReceiver(),
+                msg.substring(1),
+                true,
+                true,
+                new Date()
+        );
+        conversation.addMessage(message2);
+        conversation.save();
+        updateView(context);
     }
 
     private void processMessage(String msg, String phoneNo, Context context) {
@@ -169,9 +212,7 @@ public class SmsReceiver extends BroadcastReceiver {
                 msg,
                 false,
                 false,
-                false, /* TODO */
-                new Date(),
-                null      /* TODO */
+                new Date()
         );
 
         conversation.addMessage(message);
