@@ -41,10 +41,21 @@ public class MessageAdapter extends BaseAdapter {
         View view = convertView;
         if( view == null ) {
             if ( conversation.getMessages().get(position).getSendByUser() ) {
-                view = layoutInflater.inflate(R.layout.list_item_msg_send, null);
+                //TODO check if it's working
+                if(conversation.getMessages().get(position).getIsEncrypted()){
+                    view = layoutInflater.inflate(R.layout.list_item_msg_send_encrypted, null);
+                }
+                else {
+                    view = layoutInflater.inflate(R.layout.list_item_msg_send, null);
+                }
 
             } else {
-                view = layoutInflater.inflate(R.layout.list_item_msg_recv, null);
+                if(conversation.getMessages().get(position).getIsEncrypted()){
+                    view = layoutInflater.inflate(R.layout.list_item_msg_recv_encrypted, null);
+                }
+                else{
+                    view = layoutInflater.inflate(R.layout.list_item_msg_recv, null);
+                }
             }
 
             BubbleTextView txtMessage = view.findViewById(R.id.msg_list_item);
