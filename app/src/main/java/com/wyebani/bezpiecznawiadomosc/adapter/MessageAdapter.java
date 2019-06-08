@@ -41,7 +41,6 @@ public class MessageAdapter extends BaseAdapter {
         View view = convertView;
         if( view == null ) {
             if ( conversation.getMessages().get(position).getSendByUser() ) {
-                //TODO check if it's working
                 if(conversation.getMessages().get(position).getIsEncrypted()){
                     view = layoutInflater.inflate(R.layout.list_item_msg_send_encrypted, null);
                 }
