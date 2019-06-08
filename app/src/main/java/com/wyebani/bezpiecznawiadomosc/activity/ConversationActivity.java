@@ -232,7 +232,7 @@ public class ConversationActivity extends BaseActivity {
                     Message message = new Message(conversation.getReceiver(),
                                                   msg,
                                                   true,
-                                                  false,
+                                                  true,
                                                   new Date()
                     );
                     conversation.addMessage(message);
