@@ -30,9 +30,19 @@ public class SmsReceiver extends BroadcastReceiver {
 
     private final static String TAG = ToolSet.getTag(SmsReceiver.class.toString());
     private final static String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
+    public final static String SCREEN_TOGGLE_TAG = "SCREEN_TOGGLE_TAG";
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        String action = intent.getAction();
+        if(Intent.ACTION_SCREEN_OFF.equals(action))
+        {
+            Log.d(SCREEN_TOGGLE_TAG, "Screen is turn off.");
+        }else if(Intent.ACTION_SCREEN_ON.equals(action))
+        {
+            Log.d(SCREEN_TOGGLE_TAG, "Screen is turn on.");
+        }
+        /* TUTAJ */
         if( Objects.equals(intent.getAction(), SMS_RECEIVED) ) {
             Bundle dataBundle = intent.getExtras();
 
