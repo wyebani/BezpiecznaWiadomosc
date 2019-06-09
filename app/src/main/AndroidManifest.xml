@@ -50,5 +50,6 @@
         </receiver>
         <service android:enabled="true" android:name=".service.SmsReceiverService" />
     </application>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
 </manifest>

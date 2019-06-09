@@ -1,6 +1,7 @@
 package com.wyebani.bezpiecznawiadomosc.activity;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,7 +22,6 @@ import com.wyebani.bezpiecznawiadomosc.tools.ToolSet;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class MainActivity extends BaseActivity {
 
@@ -52,6 +52,7 @@ public class MainActivity extends BaseActivity {
 
         newConversationButton = findViewById(R.id.mainA_newConversationButton);
         newConversationButton.setOnClickListener(v -> newConversation());
+
     }
 
     private void onItemClick(Conversation conversation) {

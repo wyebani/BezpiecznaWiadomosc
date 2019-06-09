@@ -21,6 +21,8 @@ import com.wyebani.bezpiecznawiadomosc.tools.ToolSet;
 
 import java.util.TreeMap;
 
+import com.wyebani.bezpiecznawiadomosc.service.SmsReceiverService;
+
 public class LoadActivity extends BaseActivity {
 
     private static final String TAG = ToolSet.getTag(LoadActivity.class.toString());
@@ -34,7 +36,7 @@ public class LoadActivity extends BaseActivity {
 
         dropDb();
         initApp();
-
+        startService(new Intent(this, SmsReceiverService.class));
     }
 
     private void initApp() {

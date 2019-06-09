@@ -36,8 +36,6 @@ import com.wyebani.bezpiecznawiadomosc.tools.ToolSet;
 import java.security.KeyPair;
 import java.util.Date;
 
-import com.wyebani.bezpiecznawiadomosc.service.SmsReceiverService;
-
 public class ConversationActivity extends BaseActivity {
 
     private static final String TAG = ToolSet.getTag(ConversationActivity.class.toString());
@@ -65,19 +63,6 @@ public class ConversationActivity extends BaseActivity {
         Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
-
-        // Create an IntentFilter instance.
-        IntentFilter intentFilter = new IntentFilter();
-
-        // Add network connectivity change action.
-        intentFilter.addAction("android.intent.action.SCREEN_ON");
-        intentFilter.addAction("android.intent.action.SCREEN_OFF");
-
-        // Set broadcast receiver priority.
-        intentFilter.setPriority(100);
-
-        Intent backgroundService = new Intent(getApplicationContext(), SmsReceiverService.class);
-        startService(backgroundService);
 
         sendButton      = findViewById(R.id.conversationA_sendBtn);
         msgListView     = findViewById(R.id.conversationA_msgList);

@@ -1,16 +1,23 @@
 package com.wyebani.bezpiecznawiadomosc.service;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.wyebani.bezpiecznawiadomosc.activity.MainActivity;
+import com.wyebani.bezpiecznawiadomosc.R;
 import com.wyebani.bezpiecznawiadomosc.sms.smsReceiver.SmsReceiver;
 
 public class SmsReceiverService extends Service{
-    private SmsReceiver screenOnOffReceiver = null;
+
+    private static final int NOTIF_ID = 1;
+    private static final String NOTIF_CHANNEL_ID = "Channel_Id";
+    private final SmsReceiver receiver = new SmsReceiver();
 
     @Nullable
     @Override
@@ -19,43 +26,31 @@ public class SmsReceiverService extends Service{
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(Intent intent, int flags, int startId){
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.provider.Telephony.SMS_RECEIVED");
+        filter.addAction(android.telephony.TelephonyManager.ACTION_PHONE_STATE_CHANGED);
+
+        registerReceiver(receiver, filter);
+
+        startForeground();
         return super.onStartCommand(intent, flags, startId);
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
+    private void startForeground() {
+        Intent notificationIntent = new Intent(this, MainActivity.class);
 
-        // Create an IntentFilter instance.
-        IntentFilter intentFilter = new IntentFilter();
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                notificationIntent, 0);
 
-        // Add network connectivity change action.
-        intentFilter.addAction("android.intent.action.SCREEN_ON");
-        intentFilter.addAction("android.intent.action.SCREEN_OFF");
-
-        // Set broadcast receiver priority.
-        intentFilter.setPriority(100);
-
-        // Create a network change broadcast receiver.
-        screenOnOffReceiver = new SmsReceiver();
-
-        // Register the broadcast receiver with the intent filter object.
-        registerReceiver(screenOnOffReceiver, intentFilter);
-
-        Log.d(SmsReceiver.SCREEN_TOGGLE_TAG, "Service onCreate: screenOnOffReceiver is registered.");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        // Unregister screenOnOffReceiver when destroy.
-        if(screenOnOffReceiver!=null)
-        {
-            unregisterReceiver(screenOnOffReceiver);
-            Log.d(SmsReceiver.SCREEN_TOGGLE_TAG, "Service onDestroy: screenOnOffReceiver is unregistered.");
-        }
+        startForeground(NOTIF_ID, new NotificationCompat.Builder(this,
+                NOTIF_CHANNEL_ID) // don't forget create a notification channel first
+                .setOngoing(true)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText("Service is running background")
+                .setContentIntent(pendingIntent)
+                .build());
     }
 
 }
