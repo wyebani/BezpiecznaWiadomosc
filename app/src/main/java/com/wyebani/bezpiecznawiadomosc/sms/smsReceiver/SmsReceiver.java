@@ -67,6 +67,10 @@ public class SmsReceiver extends BroadcastReceiver {
                                 processKeyExchangeRequest(msg, phoneNo, context);
                                 break;
 
+                            case SmsBase.MSG_TYPE_KEY_EXCHANGE_RESPONSE:
+                                processKeyExchangeResponse(msg, phoneNo, context);
+                                break;
+
                             case SmsBase.MSG_TYPE_OTHER:
                             default:
                                 processMessage(msg, phoneNo, context);
@@ -117,6 +121,24 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 
+    private void processKeyExchangeResponse(String msg, String phoneNo, Context context) {
+        Conversation conversation = ToolSet.getConversationByPhoneNo(phoneNo);
+        String receiverPubKey = msg.substring(1);
+        Message message = new Message(
+                conversation.getReceiver(),
+                receiverPubKey,
+                false,
+                true,
+                new Date()
+        );
+        conversation.addMessage(message);
+        conversation.getReceiver().getDhKeys().setReceiverPubKey(receiverPubKey);
+        conversation.getReceiver().getDhKeys().save();
+        conversation.getReceiver().save();
+        conversation.save();
+        updateView(context);
+    }
+
     private void processKeyExchangeRequest(String msg, String phoneNo, Context context) {
         KeyPair keyPair = DiffieHellman.generateKeys();
 
@@ -163,6 +185,7 @@ public class SmsReceiver extends BroadcastReceiver {
         conversation.addMessage(message);
         conversation.getReceiver().setDhKeys(dhKeys);
         dhKeys.save();
+        conversation.getReceiver().save();
         conversation.save();
         updateView(context);
 

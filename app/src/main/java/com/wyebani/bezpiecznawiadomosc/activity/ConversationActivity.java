@@ -225,6 +225,8 @@ public class ConversationActivity extends BaseActivity {
                         DHKeys dhk = new DHKeys();
                         dhk.setReceiverPhoneNo(phoneNo);
                         conversation.getReceiver().setDhKeys(dhk);
+                        conversation.getReceiver().save();
+                        dhk.save();
                     }
                     conversation.getReceiver().getDhKeys().setMyPrivateKey(myPrivateKey);
                     String msg = SmsBase.createKeyExchangeRequest(myPublicKey);
