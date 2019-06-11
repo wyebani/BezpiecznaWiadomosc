@@ -1,6 +1,9 @@
 package com.wyebani.bezpiecznawiadomosc.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -34,12 +37,17 @@ public class MainActivity extends BaseActivity {
     /* Adapter */
     private ConversationAdapter adapter;
 
+    /* Broadcast Receiver */
+    private BroadcastReceiver receiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate()");
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        registerReceiver();
 
         List<Conversation> conversationList = Conversation.listAll(Conversation.class);
         adapter = new ConversationAdapter(conversationList, this::onItemClick);
@@ -92,11 +100,35 @@ public class MainActivity extends BaseActivity {
         return true;
     }
 
+    private void updateConversations() {
+        Log.d(TAG, "Update conversations");
+        List<Conversation> cList = Conversation.listAll(Conversation.class);
+        adapter.setConversationList(cList);
+        recyclerView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+    }
+
+    private void registerReceiver() {
+        receiver = new BroadcastReceiver()  {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                updateConversations();
+            }
+        };
+        registerReceiver(receiver, new IntentFilter("sms.received"));
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         List<Conversation> conversationList = Conversation.listAll(Conversation.class);
         adapter = new ConversationAdapter(conversationList, this::onItemClick);
         recyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
     }
 }

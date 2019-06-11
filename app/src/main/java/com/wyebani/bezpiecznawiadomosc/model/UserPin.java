@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor @AllArgsConstructor @Data @EqualsAndHashCode(callSuper=false)
 public class UserPin extends SugarRecord<UserPin> implements Serializable {
 
-    private Long        id;
     @NonNull
     private String      userPin;
 

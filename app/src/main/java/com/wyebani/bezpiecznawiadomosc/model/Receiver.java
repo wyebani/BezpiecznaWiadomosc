@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor @AllArgsConstructor @Data @EqualsAndHashCode(callSuper=false)
 public class Receiver extends SugarRecord<Receiver> implements Serializable {
 
-    @Nullable
+    @NonNull
     private String      name;
     @NonNull
     private String      phoneNo;

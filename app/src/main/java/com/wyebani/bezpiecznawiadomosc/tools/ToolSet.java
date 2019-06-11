@@ -1,7 +1,9 @@
 package com.wyebani.bezpiecznawiadomosc.tools;
 
 import android.util.Base64;
+import android.widget.EditText;
 
+import com.goodiebag.pinview.Pinview;
 import com.wyebani.bezpiecznawiadomosc.activity.BaseActivity;
 import com.wyebani.bezpiecznawiadomosc.model.Conversation;
 import com.wyebani.bezpiecznawiadomosc.model.Receiver;
@@ -111,7 +113,7 @@ public class ToolSet {
                 );
             } else {
                 receiver = new Receiver(
-                        null,
+                        "",
                         phoneNo,
                         null
                 );
@@ -139,5 +141,14 @@ public class ToolSet {
         return result.toString();
     }
 
-
+    /**
+     * Clear pinview value
+     * @param pv - pinview to clear
+     */
+    public static void clearPinview(Pinview pv) {
+        for(int i=0; i<pv.getPinLength(); ++i) {
+            EditText edittext = (EditText) pv.getChildAt(i);
+            edittext.setText("");
+        }
+    }
 }

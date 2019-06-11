@@ -144,7 +144,7 @@ public class SmsReceiver extends BroadcastReceiver {
                     );
                 } else {
                     receiver = new Receiver(
-                            null,
+                            "",
                             phoneNo,
                             null
                     );
@@ -194,13 +194,13 @@ public class SmsReceiver extends BroadcastReceiver {
                     receiver = new Receiver(
                             ToolSet.getNameByPhoneNo(BaseActivity.sContactMap, phoneNo),
                             phoneNo,
-                            null /* TODO */
+                            null
                     );
                 } else {
                     receiver = new Receiver(
-                            null,
+                            "",
                             phoneNo,
-                            null /* TODO */
+                            null
                     );
                 }
             }
@@ -216,6 +216,7 @@ public class SmsReceiver extends BroadcastReceiver {
         );
 
         conversation.addMessage(message);
+        conversation.getReceiver().save();
         conversation.save();
         updateView(context);
     }

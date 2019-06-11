@@ -19,6 +19,7 @@ import com.wyebani.bezpiecznawiadomosc.model.UserPin;
 import com.wyebani.bezpiecznawiadomosc.tools.PermTools;
 import com.wyebani.bezpiecznawiadomosc.tools.ToolSet;
 
+import java.util.List;
 import java.util.TreeMap;
 
 public class LoadActivity extends BaseActivity {
@@ -31,10 +32,7 @@ public class LoadActivity extends BaseActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_load);
-
-        dropDb();
         initApp();
-
     }
 
     private void initApp() {
@@ -42,9 +40,27 @@ public class LoadActivity extends BaseActivity {
             if( PermTools.isPermissionsGranted(LoadActivity.this, PERM_SMS) ) {
 
                 getContacts(getContentResolver());
-                startActivity(
-                        new Intent(LoadActivity.this, MainActivity.class)
-                );
+
+                List<UserPin> listOfPin = UserPin.listAll(UserPin.class);
+                if( listOfPin.isEmpty()
+                    || (listOfPin.size() > 1) ) {
+
+                    if( listOfPin.size() > 1 ) {
+                        UserPin.deleteAll(UserPin.class);
+                    }
+
+                    Log.d(TAG, "No user pin code found");
+                    startActivity(
+                            new Intent(LoadActivity.this, SetPinActivity.class)
+                    );
+                } else {
+                    Log.d(TAG, "User pin found");
+                    startActivity(
+                            new Intent(LoadActivity.this, EnterPinActivity.class)
+                    );
+                    finish();
+                }
+
                 finish();
             } else {
                 PermTools.requestPermissions(LoadActivity.this,

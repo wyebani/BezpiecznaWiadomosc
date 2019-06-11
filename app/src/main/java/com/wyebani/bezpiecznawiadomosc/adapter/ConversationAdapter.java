@@ -32,6 +32,11 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         this.clickListener = clickListener;
     }
 
+    public void setConversationList(List<Conversation> cList) {
+        conversationList = cList;
+        conversationListFull = cList;
+    }
+
     @NonNull
     @Override
     public ConversationAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
@@ -65,7 +70,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
 
         void bind(final Conversation conversation, final ConversationItemClickListener listener) {
             String cName = conversation.getReceiver().getName();
-            if( cName == null ) {
+            if( cName.isEmpty() ) {
                 cName = conversation.getReceiver().getPhoneNo();
             }
             String snippet = "";

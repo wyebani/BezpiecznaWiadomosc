@@ -5,4 +5,11 @@
     <string name="szukaj">Szukaj...</string>
     <string name="key_exchange_text">Wymiana kluczy</string>
     <string name="encrypting_enable">Włącz szyfrowanie</string>
+    <string name="loading_string">Loading...</string>
+    <string name="set_pin_text">Najpierw ustaw kod PIN</string>
+    <string name="confirm_pin_text">Potwierdź kod PIN</string>
+    <string name="clear_text">Czyść</string>
+    <string name="accept_text">Akceptuj</string>
+    <string name="enter_pin_text">Wprowadź kod PIN</string>
+    <string name="welcome_text">Witaj!</string>
 </resources>

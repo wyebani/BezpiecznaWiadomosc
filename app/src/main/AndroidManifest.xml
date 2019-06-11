@@ -15,7 +15,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.SelectContactActivity"></activity>
+        <activity android:name=".activity.EnterPinActivity"></activity>
+        <activity android:name=".activity.SetPinActivity" />
+        <activity android:name=".activity.SelectContactActivity" />
         <activity android:name=".activity.MainActivity" />
         <activity android:name=".activity.ConversationActivity" />
 
@@ -24,7 +26,7 @@
             android:value="safe_message.db" />
         <meta-data
             android:name="VERSION"
-            android:value="15" />
+            android:value="16" />
         <meta-data
             android:name="QUERY_LOG"
             android:value="true" />
