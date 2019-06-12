@@ -144,7 +144,7 @@ public class ConversationActivity extends BaseActivity {
                                 receiver,
                                 showMsg,
                                 true,
-                                false,
+                                encryptingEnable,
                                 new Date()
                         );
 

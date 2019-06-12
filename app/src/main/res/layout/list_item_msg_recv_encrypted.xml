@@ -19,7 +19,7 @@
         app:arrowPosition="14dp"
         app:arrowLocation="left"
         app:arrowCenter="true"
-        app:bubbleColor="#600000"
+        app:bubbleColor="#6d6d6d"
         />
 
 
