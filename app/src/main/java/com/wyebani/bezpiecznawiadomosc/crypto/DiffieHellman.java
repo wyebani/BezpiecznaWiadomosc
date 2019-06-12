@@ -22,7 +22,7 @@ import javax.crypto.KeyAgreement;
 public class DiffieHellman {
 
     private final static String TAG = ToolSet.getTag(DiffieHellman.class.toString());
-    private final static String ALGORITHM = "DH";
+    private final static String ALGORITHM = "DiffieHellman";
 
     public static KeyPair generateKeys() {
         Log.d(TAG, "Generating key pair");

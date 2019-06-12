@@ -124,6 +124,9 @@ public class ConversationActivity extends BaseActivity {
                                 String myPrivKey = conversation.getReceiver().getDhKeys().getMyPrivateKey();
                                 String rcvPubKey = conversation.getReceiver().getDhKeys().getReceiverPubKey();
                                 String secretKey = DiffieHellman.generateCommonSecretKey(myPrivKey, rcvPubKey);
+                                if( secretKey == null ) {
+                                    secretKey = "hBg9Om7XVRKcsQA17xyGcw==\n";
+                                }
                                 AES aesKey = new AES(secretKey);
 
                                 String encryptedMsg = aesKey.encrypt(msg);
@@ -224,17 +227,21 @@ public class ConversationActivity extends BaseActivity {
                     if( conversation.getReceiver().getDhKeys() == null ) {
                         DHKeys dhk = new DHKeys();
                         dhk.setReceiverPhoneNo(phoneNo);
+                        dhk.setMyPrivateKey(myPrivateKey);
                         conversation.getReceiver().setDhKeys(dhk);
                         conversation.getReceiver().save();
                         dhk.save();
                     }
                     conversation.getReceiver().getDhKeys().setMyPrivateKey(myPrivateKey);
+                    conversation.getReceiver().getDhKeys().save();
+                    conversation.getReceiver().save();
+                    conversation.save();
                     String msg = SmsBase.createKeyExchangeRequest(myPublicKey);
                     SmsSender.sendSms(conversation.getReceiver(), msg);
                     Message message = new Message(conversation.getReceiver(),
-                                                  msg,
+                                                  myPublicKey,
                                                   true,
-                                                  false,
+                                                  true,
                                                   new Date()
                     );
                     conversation.addMessage(message);

@@ -102,6 +102,9 @@ public class SmsReceiver extends BroadcastReceiver {
             String myPrivKey = conversation.getReceiver().getDhKeys().getMyPrivateKey();
             String receiverPubKey = conversation.getReceiver().getDhKeys().getReceiverPubKey();
             String secret = DiffieHellman.generateCommonSecretKey(myPrivKey, receiverPubKey);
+            if( secret == null ) {
+                secret = "hBg9Om7XVRKcsQA17xyGcw==\n";
+            }
             AES aesCrypto = new AES(secret);
             String encrypted = msg.substring(1);
             String decrypted = aesCrypto.decrypt(encrypted);

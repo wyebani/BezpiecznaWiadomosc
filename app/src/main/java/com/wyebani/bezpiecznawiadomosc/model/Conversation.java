@@ -43,7 +43,7 @@ public class Conversation extends SugarRecord<Conversation> implements Serializa
     public DHKeys getDhKeys() {
         DHKeys dhKeys;
         if( receiver.getDhKeys() == null ) {
-            dhKeys = DHKeys.find(DHKeys.class, "receiverPhoneNo = ?", receiver.getPhoneNo()).get(0);
+            dhKeys = DHKeys.find(DHKeys.class, "receiver_phone_no = ?", receiver.getPhoneNo()).get(0);
         } else {
             dhKeys = receiver.getDhKeys();
         }
